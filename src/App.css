@@ -1,0 +1,118 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: black;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+label {
+  margin: 10px;
+  font-size: 30px;
+}
+
+label input[type="checkbox"] + span {
+  font-size: 18px;
+  text-align: center;
+  margin-left: 5px;
+}
+
+input {
+  margin-left: 10px;
+  font-size: 16px;
+  text-align: center;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+.error {
+  color: red;
+  margin-top: 20px;
+}
+
+.result {
+  color: green;
+  margin-top: 20px;
+  white-space: pre-wrap;
+}
+
+.alignment-logs {
+  width: 80%;
+  text-align: left;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.loader-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+}
+
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+.loader-text {
+  position: absolute;
+  font-size: 16px;
+  color: #3498db;
+  text-align: center;
+  width: 100px; /* Adjust width to fit within the circle */
+  padding: 0 10px; /* Add padding to create space between text and border */
+}
+
+.downloader-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+}
+
+.downloader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Red */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+.downloader-text {
+  position: absolute;
+  font-size: 14px;
+  color: #3498db;
+  text-align: center;
+  width: 100px; /* Adjust width to fit within the circle */
+  padding: 0 10px; /* Add padding to create space between text and border */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
