@@ -3,12 +3,12 @@ This is a test version of a React+Flask app that conducts an alignment using min
 The results of the alignment can be viewed via the integrated IGV viewer within the page.
 The alignment can then be downloaded as a .zip.
 Contents of the .zip file are as follows:
--alignment.bam (binary sam file)
--alignment.sam (minimap output)
--alignment.sorted.bam (sorted bam)
--alignment.sorted.bam.bai (bam index)
--reference.fa (uploaded reference)
--target.fa (uploaded targets)
+    -alignment.bam (binary sam file)
+    -alignment.sam (minimap output)
+    -alignment.sorted.bam (sorted bam)
+    -alignment.sorted.bam.bai (bam index)
+    -reference.fa (uploaded reference)
+    -target.fa (uploaded targets)
 
 # Installation and usage
 The web-app has been containerized using docker and can be built and deployed using the following commands:
