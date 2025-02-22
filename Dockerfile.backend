@@ -13,7 +13,7 @@ RUN conda update -n base conda && \
     conda config --set solver libmamba && \
     conda install -y bioconda::minimap2 && \
     conda install -y bioconda::samtools && \
-    conda install -c conda-forge ncurses
+    conda install -y conda-forge::ncurses
 
 # Install Python dependencies
 RUN pip install flask flask-cors
