@@ -6,11 +6,11 @@ WORKDIR /app
 
 # Install conda dependencies
 RUN conda update -n base conda && \
-    conda config --add channels defaults && \
     conda config --add channels conda-forge && \
     conda config --add channels bioconda && \
     conda config --add channels pypi && \
-    conda config --set solver classic && \
+    conda install -n base conda-libmamba-solver && \
+    conda config --set solver libmamba && \
     conda install -y bioconda::minimap2 && \
     conda install -y bioconda::samtools
 
