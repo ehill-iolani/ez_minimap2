@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import igv from '../node_modules/igv/dist/igv.esm.min.js';
 
+// IMPORTANT: when deploying a server you should use the server's IP address instead of localhost!!
+
 function App() {
   const [referenceFile, setReferenceFile] = useState(null);
   const [targetFile, setTargetFile] = useState(null);
@@ -141,41 +143,48 @@ function App() {
   }, [igvBrowser]);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>EZ Minimap2 Alignment</h1>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>
+    <div className="App bg-dark">
+      <header className="App-header bg-white d-flex flex-column align-items-center justify-content-center">
+        <h1 className="display-4">EZ Minimap2 Alignment</h1>
+        <form className="form-group" onSubmit={handleSubmit}>
+          <div className="d-flex justify-content-center align-items-center">
+            <label className="form-label d-flex align-items-center">
               Reference File:
               <input
                 type="file"
+                className="form-control"
                 onChange={(e) => setReferenceFile(e.target.files[0])}
                 required
+                accept=".fa,.fasta,.fna,.fa.gz,.fasta.gz,.fna.gz"
               />
             </label>
           </div>
-          <div>
-            <label>
+          <div className="d-flex justify-content-center align-items-center">
+            <label className="form-label">
               Target File:
               <input
                 type="file"
+                className="form-control"
                 onChange={(e) => setTargetFile(e.target.files[0])}
                 required
+                accept=".fa,.fasta,.fna,.fastq,.fq,application/gzip,.fa.gz,.fasta.gz,.fna.gz,.fastq.gz,.fq.gz"
               />
             </label>
           </div>
           <div>
-            <label>
+            <label className="form-label">
               <input
                 type="checkbox"
+                className="form-check-input"
                 checked={isMinION}
                 onChange={(e) => setIsMinION(e.target.checked)}
               />
               <span>Are you uploading FASTQs produced by a MinION sequencer?</span>
             </label>
           </div>
-          <button type="submit">Run Alignment</button>
+          <div className="d-flex justify-content-center">
+            <button type="submit" className="btn btn-primary mt-3">Run Alignment</button>
+          </div>
         </form>
         {isLoading && (
           <div className="loader-container">
@@ -192,15 +201,16 @@ function App() {
         {error && <p className="error">{error}</p>}
         {result && <p className="result">{result}</p>}
         {downloadUrl && (
-          <button onClick={handleDownload}>Download Results</button>
+          <button onClick={handleDownload} className="btn btn-success mt-3">Download Results</button>
         )}
         <p className="alignment-logs">Alignment Logs:</p>
         <textarea
           value={streamedOutput}
           readOnly
+          className="form-control"
           style={{ width: '80%', height: '300px', marginTop: '10px' }}
         />
-        <div id="igv-div" style={{ width: '80%', height: '1200px' }}></div>
+        <div id="igv-div" className="mt-3" style={{ width: '80%', height: '1200px' }}></div>
       </header>
     </div>
   );
