@@ -31,7 +31,7 @@ function App() {
     const deleteOutputs = async () => {
       try {
         console.log('Attempting to delete outputs');
-        const response = await fetch(`http://localhost:8080/delete_outputs?sessionId=${sessionId}`, {
+        const response = await fetch(`http://${window.location.hostname}:8080/delete_outputs?sessionId=${sessionId}`, {
           method: 'DELETE',
         });
         if (!response.ok) {
@@ -61,7 +61,7 @@ function App() {
     formData.append('sessionId', sessionId); // Add session ID to the form data
 
     try {
-      const response = await fetch('http://localhost:8080/run_alignment', {
+      const response = await fetch(`http://${window.location.hostname}:8080/run_alignment`, {
         method: 'POST',
         body: formData,
       });
@@ -82,7 +82,7 @@ function App() {
       }
 
       setIsLoading(false);
-      setDownloadUrl(`http://localhost:8080/compress_and_download?sessionId=${sessionId}`); // Set the download URL
+      setDownloadUrl(`http://${window.location.hostname}:8080/compress_and_download?sessionId=${sessionId}`); // Set the download URL
       loadIgvBrowser();
     } catch (err) {
       setError(err.message);
@@ -93,7 +93,7 @@ function App() {
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch(`http://localhost:8080/compress_and_download?sessionId=${sessionId}`, {
+      const response = await fetch(`http://${window.location.hostname}:8080/compress_and_download?sessionId=${sessionId}`, {
         method: 'GET',
       });
 
@@ -121,14 +121,14 @@ function App() {
     const igvOptions = {
       reference: {
         id: 'Output',
-        fastaURL: `http://localhost:8080/output_alignment/${sessionId}/reference.fa`,
+        fastaURL: `http://${window.location.hostname}:8080/output_alignment/${sessionId}/reference.fa`,
         indexed: false,
         tracks: [
           {
             name: 'Mapping',
             type: 'alignment',
-            url: `http://localhost:8080/output_alignment/${sessionId}/alignment.sorted.bam`,
-            indexURL: `http://localhost:8080/output_alignment/${sessionId}/alignment.sorted.bam.bai`,
+            url: `http://${window.location.hostname}:8080/output_alignment/${sessionId}/alignment.sorted.bam`,
+            indexURL: `http://${window.location.hostname}:8080/output_alignment/${sessionId}/alignment.sorted.bam.bai`,
             displayMode: 'EXPANDED',
             format: 'bam',
             indexed: true,
