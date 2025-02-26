@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import igv from '../node_modules/igv/dist/igv.esm.min.js';
+import { v4 as uuidv4 } from 'uuid'; // Import UUID library
 
 // IMPORTANT: when deploying a server you should use the server's IP address instead of localhost!!
 
@@ -15,12 +16,22 @@ function App() {
   const [streamedOutput, setStreamedOutput] = useState('');
   const [isMinION, setIsMinION] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [sessionId] = useState(() => {
+    const savedSessionId = localStorage.getItem('sessionId');
+    if (savedSessionId) {
+      return savedSessionId;
+    } else {
+      const newSessionId = uuidv4();
+      localStorage.setItem('sessionId', newSessionId);
+      return newSessionId;
+    }
+  }); // Generate or retrieve a unique session ID
 
   useEffect(() => {
     const deleteOutputs = async () => {
       try {
         console.log('Attempting to delete outputs');
-        const response = await fetch('http://localhost:8080/delete_outputs', {
+        const response = await fetch(`http://localhost:8080/delete_outputs?sessionId=${sessionId}`, {
           method: 'DELETE',
         });
         if (!response.ok) {
@@ -33,7 +44,7 @@ function App() {
     };
 
     deleteOutputs();
-  }, []);
+  }, [sessionId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,6 +58,7 @@ function App() {
     formData.append('reference', referenceFile);
     formData.append('target', targetFile);
     formData.append('isMinION', isMinION); // Add the checkbox state to the form data
+    formData.append('sessionId', sessionId); // Add session ID to the form data
 
     try {
       const response = await fetch('http://localhost:8080/run_alignment', {
@@ -70,7 +82,7 @@ function App() {
       }
 
       setIsLoading(false);
-      setDownloadUrl('http://localhost:8080/compress_and_download'); // Set the download URL
+      setDownloadUrl(`http://localhost:8080/compress_and_download?sessionId=${sessionId}`); // Set the download URL
       loadIgvBrowser();
     } catch (err) {
       setError(err.message);
@@ -81,7 +93,7 @@ function App() {
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch('http://localhost:8080/compress_and_download', {
+      const response = await fetch(`http://localhost:8080/compress_and_download?sessionId=${sessionId}`, {
         method: 'GET',
       });
 
@@ -109,14 +121,14 @@ function App() {
     const igvOptions = {
       reference: {
         id: 'Output',
-        fastaURL: 'http://localhost:8080/output_alignment/reference.fa',
+        fastaURL: `http://localhost:8080/output_alignment/${sessionId}/reference.fa`,
         indexed: false,
         tracks: [
           {
             name: 'Mapping',
             type: 'alignment',
-            url: 'http://localhost:8080/output_alignment/alignment.sorted.bam',
-            indexURL: 'http://localhost:8080/output_alignment/alignment.sorted.bam.bai',
+            url: `http://localhost:8080/output_alignment/${sessionId}/alignment.sorted.bam`,
+            indexURL: `http://localhost:8080/output_alignment/${sessionId}/alignment.sorted.bam.bai`,
             displayMode: 'EXPANDED',
             format: 'bam',
             indexed: true,
