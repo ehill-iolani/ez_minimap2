@@ -1,7 +1,7 @@
 import os
 import subprocess
 import logging
-from flask import Flask, request, jsonify, send_file, Response
+from flask import Flask, request, jsonify, send_file, Response, send_from_directory
 from flask_cors import CORS
 import shutil
 import gzip
@@ -183,14 +183,14 @@ def run_alignment():
     return Response(run_minimap2(reference_path, target_path, is_minion), content_type='text/plain')
 
 # Route to intiate the file compression and download
-@app.route('/compress_and_download', methods=['GET'])
-def compress_and_download():
-    try:
-        compress_results()
-        return send_file('./output_alignment_dl.zip', as_attachment=True)
-    except Exception as e:
-        app.logger.error(f"Error compressing or downloading results: {e}")
-        return jsonify({'error': 'Error compressing or downloading results'}), 500
+# @app.route('/compress_and_download', methods=['GET'])
+# def compress_and_download():
+#     try:
+#         compress_results()
+#         return send_file('./output_alignment_dl.zip', as_attachment=True)
+#     except Exception as e:
+#         app.logger.error(f"Error compressing or downloading results: {e}")
+#         return jsonify({'error': 'Error compressing or downloading results'}), 500
 
 # Route to visualize the alignment
 @app.route('/output_alignment/<path:filename>', methods=['GET'])
@@ -214,17 +214,37 @@ def delete_outputs():
     app.logger.debug('Received request to delete outputs')
     try:
         output_dir = './output_alignment'
-        output_zip = './output_alignment_dl.zip'
+        # output_zip = './output_alignment_dl.zip'
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
             app.logger.debug(f'Deleted directory: {output_dir}')
-        if os.path.exists(output_zip):
-            os.remove(output_zip)
-            app.logger.debug(f'Deleted file: {output_zip}')
+        # if os.path.exists(output_zip):
+        #     os.remove(output_zip)
+        #     app.logger.debug(f'Deleted file: {output_zip}')
         return jsonify({'message': 'Output files deleted successfully'}), 200
     except Exception as e:
         app.logger.error(f"Error deleting output files: {e}")
         return jsonify({'error': 'Error deleting output files'}), 500
+
+@app.route('/get_output_files', methods=['GET'])
+def get_output_files():
+    output_dir = './output_alignment'  # Ensure this matches the directory where output files are stored
+    try:
+        app.logger.debug(f"Reading files from directory: {output_dir}")
+        files = os.listdir(output_dir)
+        app.logger.debug(f"Files found: {files}")
+        return jsonify(files)
+    except Exception as e:
+        app.logger.error(f"Error reading output directory: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/output_alignment/<filename>', methods=['GET'])
+def download_output_file(filename):
+    output_dir = './output_alignment'
+    try:
+        return send_from_directory(output_dir, filename)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 ##############
 ### OH YUH ###

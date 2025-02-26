@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import igv from '../node_modules/igv/dist/igv.esm.min.js';
+//import JSZip from 'jszip';
 
 // IMPORTANT: when deploying a server you should use the server's IP address instead of localhost!!
 
@@ -9,12 +10,13 @@ function App() {
   const [targetFile, setTargetFile] = useState(null);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
-  const [downloadUrl, setDownloadUrl] = useState('');
+  //const [downloadUrl, setDownloadUrl] = useState('');
   const [igvBrowser, setIgvBrowser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamedOutput, setStreamedOutput] = useState('');
   const [isMinION, setIsMinION] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [hasCachedOutput, setHasCachedOutput] = useState(false);
 
   useEffect(() => {
     const deleteOutputs = async () => {
@@ -35,18 +37,24 @@ function App() {
     deleteOutputs();
   }, []);
 
+  useEffect(() => {
+    const cachedOutput = localStorage.getItem('alignmentOutput');
+    if (cachedOutput) {
+      setHasCachedOutput(true);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setResult('');
-    setDownloadUrl('');
     setStreamedOutput('');
     setIsLoading(true);
 
     const formData = new FormData();
     formData.append('reference', referenceFile);
     formData.append('target', targetFile);
-    formData.append('isMinION', isMinION); // Add the checkbox state to the form data
+    formData.append('isMinION', isMinION);
 
     try {
       const response = await fetch('http://localhost:8080/run_alignment', {
@@ -61,16 +69,21 @@ function App() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let done = false;
+      let output = '';
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         const chunk = decoder.decode(value, { stream: true });
+        output += chunk;
         setStreamedOutput((prev) => prev + chunk);
       }
 
+      // Store the output in local storage
+      localStorage.setItem('alignmentOutput', output);
+      setHasCachedOutput(true);
+
       setIsLoading(false);
-      setDownloadUrl('http://localhost:8080/compress_and_download'); // Set the download URL
       loadIgvBrowser();
     } catch (err) {
       setError(err.message);
@@ -81,24 +94,34 @@ function App() {
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch('http://localhost:8080/compress_and_download', {
+      const response = await fetch('http://localhost:8080/get_output_files', {
         method: 'GET',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to compress and download results');
+        throw new Error('Failed to fetch output files');
       }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'output_alignment_dl.zip';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const files = await response.json();
+
+      for (const file of files) {
+        const fileResponse = await fetch(`http://localhost:8080/output_alignment/${file}`);
+        if (!fileResponse.ok) {
+          throw new Error(`Failed to fetch file: ${file}`);
+        }
+
+        const blob = await fileResponse.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
     } catch (err) {
       setError(err.message);
+      console.log(err);
     } finally {
       setIsDownloading(false);
     }
@@ -200,7 +223,7 @@ function App() {
         )}
         {error && <p className="error">{error}</p>}
         {result && <p className="result">{result}</p>}
-        {downloadUrl && (
+        {hasCachedOutput && (
           <button onClick={handleDownload} className="btn btn-success mt-3">Download Results</button>
         )}
         <p className="alignment-logs">Alignment Logs:</p>
